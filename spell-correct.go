@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"regexp"
-	"fmt"
 	"strings"
+	"time"
 )
 
 func train(training_data string) map[string]int {
@@ -36,13 +37,13 @@ func edits1(word string, ch chan string) {
 }
 
 func edits1and2(word string, ch chan string) {
-	edits1ch := make(chan string, 10)
+	ch1 := make(chan string)
 	go func() {
-		edits1(word, edits1ch)
-		ch <- ""}()
-	for e1 := range edits1ch {
-		if e1 == "" { break }
-		edits1(e1, ch)
+		edits1(word, ch1)
+		ch1 <- ""}()
+	for e1 := range ch1 {
+		if e1 == "" { return }
+		go edits1(e1, ch)
 		ch <- e1
 	}
 }
@@ -67,6 +68,7 @@ func correct(word string, NWORDS map[string]int) string {
 
 func main() {
 	model := train("big.txt")
-	fmt.Println(correct("speling", model))
-	fmt.Println(correct("korrecter", model))
+	startTime := time.Nanoseconds()
+	for i := 0; i < 100; i++ { correct("korrecter", model) }
+	fmt.Printf("Real : %v\n", float64(time.Nanoseconds() - startTime) / float64(1e9))
 }
