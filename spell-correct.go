@@ -37,16 +37,16 @@ func edits1(word string, ch chan string) {
 }
 
 func edits2(word string, ch chan string) {
-	ch1 := make(chan string)
+	ch1 := make(chan string, 1024*1024)
 	go func() { edits1(word, ch1); ch1 <- "" }()
 	for e1 := range ch1 {
 		if e1 == "" { break }
-		go edits1(e1, ch)
+		edits1(e1, ch)
 	}
 }
 
 func best(word string, edits func(string, chan string), model map[string]int) string {
-	ch := make(chan string)
+	ch := make(chan string, 1024*1024)
 	go func() { edits(word, ch); ch <- "" }()
 	maxFreq := 0
 	correction := ""
@@ -63,12 +63,12 @@ func correct(word string, model map[string]int) string {
 	if _, present := model[word]; present { return word }
 	if correction := best(word, edits1, model); correction != "" { return correction }
 	if correction := best(word, edits2, model); correction != "" { return correction }
-	return ""
+	return word
 }
 
 func main() {
 	model := train("big.txt")
 	startTime := time.Nanoseconds()
-	for i := 0; i < 100; i++ { correct("korrecter", model) }
-	fmt.Printf("Real : %v\n", float64(time.Nanoseconds() - startTime) / float64(1e9))
+	for i := 0; i < 1; i++ { fmt.Println(correct("korrecter", model)) }
+	fmt.Printf("Time : %v\n", float64(time.Nanoseconds() - startTime) / float64(1e9))
 }
