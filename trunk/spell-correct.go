@@ -35,7 +35,7 @@ func edits1(word string, ch chan string) {
 	}
 }
 
-func edits2(word string, ch chan string) {
+func edits1and2(word string, ch chan string) {
 	edits1ch := make(chan string, 10)
 	go func() {
 		edits1(word, edits1ch)
@@ -43,6 +43,7 @@ func edits2(word string, ch chan string) {
 	for e1 := range edits1ch {
 		if e1 == "" { break }
 		edits1(e1, ch)
+		ch <- e1
 	}
 }
 
@@ -50,8 +51,7 @@ func correct(word string, NWORDS map[string]int) string {
 	ch := make(chan string)
 	go func() {
 		ch <- word
-		edits1(word, ch)
-		edits2(word, ch)
+		edits1and2(word, ch)
 		ch <- ""
 	}()
 	maxFreq := 0
