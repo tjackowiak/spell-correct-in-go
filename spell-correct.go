@@ -1,9 +1,3 @@
-// This is an implementation of Peter Norvig's spelling corrector,
-// http://norvig.com/spell-correct.html, in the Go programming
-// language.
-//
-// Author: Yi Wang (yi.wang.2005@gmail.com)
-
 package main
 
 import (
@@ -34,13 +28,11 @@ func edits1(word string, ch chan string) {
 		splits = append(splits, Pair{word[:i], word[i:]}) }
 
 	for _, s := range splits { // deletes
-		if len(s.b) > 0 { ch <- s.a + s.b[1:] }}
-	for _, s := range splits { // transposes
-		if len(s.b) > 1 { ch <- s.a + string(s.b[1]) + string(s.b[0]) + s.b[2:] }}
-	for _, s := range splits { // replaces
-		for _, c := range alphabet { if len(s.b) > 0 { ch <- s.a + string(c) + s.b[1:] }}}
-	for _, s := range splits { // inserts
-		for _, c := range alphabet { ch <- s.a + string(c) + s.b }}
+		if len(s.b) > 0 { ch <- s.a + s.b[1:] }
+		if len(s.b) > 1 { ch <- s.a + string(s.b[1]) + string(s.b[0]) + s.b[2:] }
+		for _, c := range alphabet { if len(s.b) > 0 { ch <- s.a + string(c) + s.b[1:] }}
+		for _, c := range alphabet { ch <- s.a + string(c) + s.b }
+	}
 }
 
 func edits2(word string, ch chan string) {
