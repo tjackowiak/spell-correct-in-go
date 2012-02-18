@@ -36,33 +36,33 @@ func edits1(word string, ch chan string) {
 	}
 }
 
-func edits1and2(word string, ch chan string) {
+func edits2(word string, ch chan string) {
 	ch1 := make(chan string)
-	go func() {
-		edits1(word, ch1)
-		ch1 <- ""}()
+	go func() { edits1(word, ch1); ch1 <- "" }()
 	for e1 := range ch1 {
-		if e1 == "" { return }
+		if e1 == "" { break }
 		go edits1(e1, ch)
-		ch <- e1
 	}
 }
 
-func correct(word string, NWORDS map[string]int) string {
+func best(word string, edits func(string, chan string), model map[string]int) string {
 	ch := make(chan string)
-	go func() {
-		ch <- word
-		edits1and2(word, ch)
-		ch <- ""
-	}()
+	go func() { edits(word, ch); ch <- "" }()
 	maxFreq := 0
 	correction := ""
 	for word := range ch {
-		if word == "" { return correction }
-		if freq, present := NWORDS[word]; present && freq > maxFreq {
+		if word == "" { break }
+		if freq, present := model[word]; present && freq > maxFreq {
 			maxFreq, correction = freq, word
 		}
 	}
+	return correction
+}
+
+func correct(word string, model map[string]int) string {
+	if _, present := model[word]; present { return word }
+	if correction := best(word, edits1, model); correction != "" { return correction }
+	if correction := best(word, edits2, model); correction != "" { return correction }
 	return ""
 }
 
