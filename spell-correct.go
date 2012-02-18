@@ -27,7 +27,7 @@ func edits1(word string, ch chan string) {
 	for i := 0; i < len(word) + 1; i++ {
 		splits = append(splits, Pair{word[:i], word[i:]}) }
 
-	for _, s := range splits { // deletes
+	for _, s := range splits {
 		if len(s.b) > 0 { ch <- s.a + s.b[1:] }
 		if len(s.b) > 1 { ch <- s.a + string(s.b[1]) + string(s.b[0]) + s.b[2:] }
 		for _, c := range alphabet { if len(s.b) > 0 { ch <- s.a + string(c) + s.b[1:] }}
